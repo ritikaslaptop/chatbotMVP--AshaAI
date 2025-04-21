@@ -1,4 +1,3 @@
-#sets up flaskapp,config and database connection
 import os
 import logging
 from datetime import datetime
@@ -14,9 +13,11 @@ from session_manager import initialize_session, get_session_context, update_sess
 from helpers import log_interaction
 from bias_detector import detect_bias
 
+#login
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
+#iniialize flask
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "asha-dev-secret")
 app.config['SESSION_TYPE'] = 'filesystem'
@@ -26,7 +27,6 @@ def init_db():
     try:
         conn = sqlite3.connect(':memory:')
         cursor = conn.cursor()
-
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS interactions (
             id TEXT PRIMARY KEY,
@@ -63,16 +63,16 @@ def init_db():
         )
         ''')
 
+
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_interactions_session_id ON interactions(session_id)')
-
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_interactions_timestamp ON interactions(timestamp)')
-
         conn.commit()
         conn.close()
         logger.info("Database initialized successfully")
     except Exception as e:
         logger.error(f"Error initializing database: {e}")
 
+#start
 init_db()
 
 knowledge_base = load_all_knowledge()
@@ -80,12 +80,16 @@ logger.info("Knowledge base loaded successfully")
 
 @app.route('/')
 def index():
+    """Render the main chat interface"""
+    #clear old session
     session.clear()
+    #start a fresh session
     initialize_session(session)
     return render_template('index.html')
 
 @app.route('/api/chat', methods=['POST'])
 def chat():
+    """Process chat messages from the user"""
     try:
         data = request.json
         user_message = data.get('message', '').strip()
@@ -93,10 +97,14 @@ def chat():
         if not user_message:
             return jsonify({'error': 'Message cannot be empty'}), 400
 
+        #bias detector
         is_biased, bias_score, bias_explanation = detect_bias(user_message)
         if is_biased:
+            #log bias findings
             interaction_id = str(uuid.uuid4())
             timestamp = datetime.now().isoformat()
+
+            #insert into bias_detections table
             conn = sqlite3.connect('database/interactions.db')
             cursor = conn.cursor()
             cursor.execute(
@@ -104,6 +112,7 @@ def chat():
                 (interaction_id, user_message, bias_score, "gender/toxic", timestamp)
             )
 
+            #update metrics for today
             today = datetime.now().strftime('%Y-%m-%d')
             cursor.execute('SELECT id FROM metrics WHERE date = ?', (today,))
             metrics_row = cursor.fetchone()
@@ -119,14 +128,15 @@ def chat():
             conn.commit()
             conn.close()
 
+            #return bias explanation response
             return jsonify({
                 'id': interaction_id,
                 'message': bias_explanation or "I noticed that your message contains content that could be considered inappropriate or biased. At JobsForHer, we're committed to creating a respectful environment for all users. Could you please rephrase your message?",
                 'timestamp': timestamp
             })
 
+        #get session context for multi-turn conversation
         context = get_session_context(session)
-
         response, updated_context = process_user_message(
             user_message,
             context,
@@ -135,9 +145,11 @@ def chat():
 
         update_session_context(session, updated_context)
 
+        #log interaction in database
         interaction_id = str(uuid.uuid4())
         timestamp = datetime.now().isoformat()
 
+        #insert into interactions table
         conn = sqlite3.connect('database/interactions.db')
         cursor = conn.cursor()
         cursor.execute(
@@ -145,10 +157,12 @@ def chat():
             (interaction_id, session.get('id', 'unknown'), user_message, response, timestamp)
         )
 
+        #update metrics for today
         today = datetime.now().strftime('%Y-%m-%d')
         cursor.execute('SELECT id FROM metrics WHERE date = ?', (today,))
         metrics_row = cursor.fetchone()
 
+        #update metrics counters
         if metrics_row:
             cursor.execute('UPDATE metrics SET total_interactions = total_interactions + 1 WHERE date = ?', (today,))
         else:
@@ -157,6 +171,7 @@ def chat():
                 (today, 1)
             )
 
+        #track search types
         if "job" in user_message.lower():
             cursor.execute('UPDATE metrics SET job_searches = job_searches + 1 WHERE date = ?', (today,))
 
@@ -206,9 +221,11 @@ def feedback():
         allowed_feedback = ['positive', 'negative', 'neutral']
         if feedback_value.lower() not in allowed_feedback:
             return jsonify({'error': 'Invalid feedback value'}), 400
+            return jsonify({'error': 'Invalid feedback value'}), 400
 
         conn = sqlite3.connect('database/interactions.db')
         cursor = conn.cursor()
+
 
         cursor.execute('SELECT id FROM interactions WHERE id = ?', (interaction_id,))
         interaction = cursor.fetchone()

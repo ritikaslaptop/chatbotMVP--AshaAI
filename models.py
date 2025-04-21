@@ -4,6 +4,7 @@ from sqlalchemy.sql import func
 
 
 class Interaction(db.Model):
+    """Model for user-bot interactions"""
     id = db.Column(db.String(36), primary_key=True)
     session_id = db.Column(db.String(36), nullable=False, index=True)
     user_message = db.Column(db.Text, nullable=False)
@@ -29,6 +30,7 @@ class BiasDetection(db.Model):
 
 
 class UserPreference(db.Model):
+    """Model for user preferences and settings"""
     id = db.Column(db.Integer, primary_key=True)
     session_id = db.Column(db.String(36), nullable=False, unique=True, index=True)
     preferred_job_types = db.Column(db.String(255), nullable=True)
@@ -43,6 +45,7 @@ class UserPreference(db.Model):
 
 
 class JobApplication(db.Model):
+    """Model for tracking job applications"""
     id = db.Column(db.Integer, primary_key=True)
     session_id = db.Column(db.String(36), nullable=False, index=True)
     job_id = db.Column(db.String(36), nullable=False)
@@ -57,6 +60,7 @@ class JobApplication(db.Model):
 
 
 class MetricsTracker(db.Model):
+    """Model for tracking usage metrics"""
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.Date, default=datetime.utcnow().date, index=True)
     total_interactions = db.Column(db.Integer, default=0)

@@ -1,0 +1,52 @@
+[
+  {
+    "id": "job-1",
+    "title": "Frontend Developer",
+    "company": "TechCorp India",
+    "location": "Bangalore (Remote)",
+    "description": "We're looking for a skilled Frontend Developer to join our team. You'll be responsible for developing user interfaces and implementing responsive designs.",
+    "requirements": "3+ years of experience with React, HTML, CSS, and JavaScript. Experience with responsive design and mobile-first development.",
+    "date_posted": "2023-10-25",
+    "type": "job"
+  },
+  {
+    "id": "job-2",
+    "title": "Marketing Manager",
+    "company": "Global Marketing Solutions",
+    "location": "Mumbai",
+    "description": "Join our marketing team to lead campaigns, analyze market trends, and develop marketing strategies for our clients.",
+    "requirements": "5+ years of marketing experience, strong communication skills, and experience with digital marketing tools.",
+    "date_posted": "2023-10-24",
+    "type": "job"
+  },
+  {
+    "id": "job-3",
+    "title": "Data Analyst",
+    "company": "AnalyticsFirst",
+    "location": "Hyderabad (Hybrid)",
+    "description": "We're seeking a Data Analyst to interpret data, analyze results, and provide ongoing reports to help drive business decisions.",
+    "requirements": "Experience with SQL, Excel, and data visualization tools. Strong problem-solving skills and attention to detail.",
+    "date_posted": "2023-10-23",
+    "type": "job"
+  },
+  {
+    "id": "job-4",
+    "title": "HR Manager",
+    "company": "People Solutions",
+    "location": "Delhi",
+    "description": "Lead our HR department in developing and implementing HR policies, recruitment, and employee development programs.",
+    "requirements": "7+ years of HR experience, knowledge of Indian labor laws, and excellent interpersonal skills.",
+    "date_posted": "2023-10-22",
+    "type": "job"
+  },
+  {
+    "id": "job-5",
+    "title": "Backend Developer",
+    "company": "CloudSystems",
+    "location": "Remote",
+    "description": "Develop server-side logic, maintain high-performance applications, and integrate with frontend components.",
+    "requirements": "Experience with Python, Flask or Django, and database design. Knowledge of cloud services (AWS/Azure) is a plus.",
+    "date_posted": "2023-10-21",
+    "type": "job"
+  }
+]

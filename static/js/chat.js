@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
         );
 
 
-        text = text.replace(/\n/g, '<br>');
+        text = text.replace(/\n/g, '<br>');#
 
         if (text.includes('\n-') || text.includes('\n*')) {
             const lines = text.split('<br>');

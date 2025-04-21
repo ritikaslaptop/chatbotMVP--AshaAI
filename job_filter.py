@@ -2,7 +2,7 @@ import random
 
 LOCATIONS = ["Mumbai", "Delhi", "Bangalore", "Bengaluru", "Hyderabad", "Chennai",
     "Kolkata", "Pune", "Ahmedabad", "Jaipur", "Gurgaon", "Noida"]
-
+#
 def detect_job_filters(user_message):
     user_message = user_message.lower()
     filters = {

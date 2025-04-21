@@ -8,6 +8,6 @@ CREATE TABLE IF NOT EXISTS interactions (
     feedback TEXT
 );
 
-CREATE INDEX IF NOT EXISTS idx_interactions_session_id ON interactions(session_id);
+CREATE INDEX IF NOT EXISTS idx_interactions_session_id ON interactions (session_id);
 
 CREATE INDEX IF NOT EXISTS idx_interactions_timestamp ON interactions(timestamp);

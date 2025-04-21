@@ -3,7 +3,7 @@ import os
 import logging
 
 logger = logging.getLogger(__name__)
-
+#
 DATA_DIR = 'data'
 KNOWLEDGE_FILES = {'jobs':'expanded_jobs.json'}
 

@@ -5,7 +5,7 @@ import re
 logger = logging.getLogger(__name__)
 
 
-def semantic_search(query, knowledge_base, top_k=5):
+def ##(query, knowledge_base, top_k=5):
     try:
         all_documents = []
         for knowledge_type, items in knowledge_base.items():

@@ -211,7 +211,7 @@ def _identify_query_type(user_message, search_results):
         result_types = {}
         for result in search_results:
             result_type = result.get('type', 'unknown')
-            result_types[result_type] = result_types.get(result_type, 0) + 1
+            result_types[result_type] = result_types.get(result_type, 0) + 1#
 
         if result_types:
             most_common_type = max(result_types.items(), key=lambda x: x[1])[0]

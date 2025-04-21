@@ -57,4 +57,4 @@ def detect_bias(text):
     if pattern_bias:
         logger.info(f"Pattern-based bias detected in: '{text}'")
         return True, 0.9, pattern_bias
-    return False, 0, ""
+    return False, 0, ""#

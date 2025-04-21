@@ -1,6 +1,6 @@
 from datetime import datetime
 from app import db
-from sqlalchemy.sql import func
+from sqlalchemy.sql import func ##
 
 
 class Interaction(db.Model):

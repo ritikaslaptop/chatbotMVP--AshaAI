@@ -163,7 +163,7 @@ def create_jobs_file(url):
     except Exception as e:
         logger.error(f"Error creating job listings file: {e}")
         return []
-
+##
 
 if __name__ == "__main__":
     logging.basicConfig(

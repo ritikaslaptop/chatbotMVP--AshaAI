@@ -19,49 +19,10 @@ logger = logging.getLogger(__name__)
 
 #iniialize flask
 app = Flask(__name__)
-app.secret_key = os.environ.get("SESSION_SECRET", "asha-dev-secret")
-app.config['SESSION_TYPE'] = 'filesystem'
-app.config['PERMANENT_SESSION_LIFETIME'] = 1800  # 30 minutes
-
-def init_db():
-    try:
-        conn = sqlite3.connect(':memory:')
-        cursor = conn.cursor()
-        cursor.execute('''
-        CREATE TABLE IF NOT EXISTS interactions (
-            id TEXT PRIMARY KEY,
-            session_id TEXT,
-            user_message TEXT,
-            bot_response TEXT,
-            timestamp TEXT,
-            feedback TEXT
-        )
-        ''')
-
-        cursor.execute('''
-        CREATE TABLE IF NOT EXISTS bias_detections (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            interaction_id TEXT,
-            message TEXT,
-            bias_score REAL,
-            bias_type TEXT,
-            timestamp TEXT,
-            FOREIGN KEY(interaction_id) REFERENCES interactions(id)
-        )
-        ''')
-
-        cursor.execute('''
-        CREATE TABLE IF NOT EXISTS metrics (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            date TEXT,
-            total_interactions INTEGER DEFAULT 0,
-            job_searches INTEGER DEFAULT 0,
-            filtered_job_searches INTEGER DEFAULT 0,
-            event_searches INTEGER DEFAULT 0,
-            mentorship_searches INTEGER DEFAULT 0,
-            bias_detections INTEGER DEFAULT 0
-        )
-        ''')
+app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'your_secret_key')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.permanent_session_lifetime = timedelta(hours=1)
 
 
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_interactions_session_id ON interactions(session_id)')

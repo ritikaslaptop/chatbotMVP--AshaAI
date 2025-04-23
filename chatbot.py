@@ -23,10 +23,10 @@ logger = logging.getLogger(__name__)
 
 
 def process_user_message(
-        user_message,
-        context,
-        knowledge_base
-):
+        user_message: str,
+        context: dict,
+        knowledge_base: dict
+) -> tuple:
     try:
         guardrail_response = apply_all_guardrails(user_message)
         if guardrail_response:
@@ -65,7 +65,7 @@ def process_user_message(
         return "I'm sorry, I encountered an issue processing your request. Please try again.", context
 
 
-def _build_search_query(user_message, context):
+def _build_search_query(user_message: str, context: dict) -> str:
     query = user_message
 
     relevant_entity_types = ['job_role', 'location', 'skill', 'industry', 'event_type']
@@ -83,10 +83,10 @@ def _build_search_query(user_message, context):
 
 
 def _generate_response(
-        user_message,
-        context,
-        search_results
-):
+        user_message: str,
+        context: dict,
+        search_results: list
+) -> str:
     is_new_conversation = 'history' not in context or len(context.get('history', [])) <= 1
 
     farewell_patterns = [
@@ -165,7 +165,7 @@ def _generate_response(
     return main_response
 
 
-def _identify_query_type(user_message, search_results):
+def _identify_query_type(user_message: str, search_results: list) -> str:
     job_filter_patterns = [
         r'\b(jobs|positions|opportunities) (in|at|near|for|with)\b',
         r'\b(remote|wfh|work from home|hybrid|on-site|in-office) (jobs|positions|work)\b',
@@ -211,7 +211,7 @@ def _identify_query_type(user_message, search_results):
         result_types = {}
         for result in search_results:
             result_type = result.get('type', 'unknown')
-            result_types[result_type] = result_types.get(result_type, 0) + 1#
+            result_types[result_type] = result_types.get(result_type, 0) + 1
 
         if result_types:
             most_common_type = max(result_types.items(), key=lambda x: x[1])[0]

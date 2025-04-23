@@ -1,2 +1,3 @@
 from app import app
-handler = app
+def handler(event, context):
+    return app

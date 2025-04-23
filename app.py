@@ -8,31 +8,24 @@ from session_manager import initialize_session, get_session_context, update_sess
 from helpers import log_interaction
 from bias_detector import detect_bias
 import logging
-
-# Import db from extensions
 from extensions import db
-# Import models
 from models import Interaction, BiasDetection, MetricsTracker
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-# Initialize flask
+#init flask
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'your_secret_key')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.permanent_session_lifetime = timedelta(hours=1)
 
-# Initialize the db with the app
 db.init_app(app)
 
-# Create database tables if they don't exist (within the application context)
 with app.app_context():
     db.create_all()
     logger.info("Database tables created (explicitly)")
-
-# Rest of your code remains the same
 
 knowledge_base = load_all_knowledge()
 logger.info("Knowledge base loaded successfully")
@@ -175,3 +168,4 @@ def feedback():
         return jsonify({'error': str(e)}), 500
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
+                                                                                       #works :)

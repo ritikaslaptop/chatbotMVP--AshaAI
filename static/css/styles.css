@@ -1,19 +1,6 @@
-
-:root[data-bs-theme="dark"] {
-  --primary-color: #5E17EB;
-  --secondary-color: #e83e8c;
-  --bg-color: #121212;
-  --card-bg: #1e1e1e;
-  --text-color: #f8f9fa;
-  --text-muted: #a7a7a7;
-  --border-color: #343a40;
-  --quote-bg: #1e1e1e;
-  --button-text: #ffffff;
-}
-
 :root[data-bs-theme="light"] {
-  --primary-color: #5E17EB;
-  --secondary-color: #e83e8c;
+  --primary-color: #935073;
+  --secondary-color: #8BC34A;
   --bg-color: #ffffff;
   --card-bg: #f8f9fa;
   --text-color: #212529;
@@ -35,6 +22,12 @@
 }
 
 body {
+  background-color: var(--bg-dark);
+  color: var(--text-light);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body[data-bs-theme="light"] {
   background-color: var(--bg-color);
   color: var(--text-color);
 }
@@ -49,22 +42,9 @@ body {
   color: var(--text-color);
 }
 
-.message-bubble {
-  color: var(--text-color);
-}
-
-.user-message .message-bubble {
-  color: #ffffff;
-}
-
-.quote-section p {
-  color: var(--text-color);
-}
-
 .text-light-emphasis {
   color: var(--text-color) !important;
 }
-
 
 .quote-section {
   background-color: var(--card-bg);
@@ -76,20 +56,9 @@ body {
   color: var(--text-light);
   font-size: 1.1rem;
 }
-  --primary-color: #5E17EB;
-  --primary-dark: #4b12c2;
-  --secondary-color: #e83e8c;
-  --bg-dark: #121212;
-  --card-bg: #1e1e1e;
-  --text-light: #f8f9fa;
-  --text-muted: #a7a7a7;
-  --border-color: #343a40;
-}
 
-body {
-  background-color: var(--bg-dark);
-  color: var(--text-light);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+.quote-section p[data-bs-theme="light"] {
+  color: var(--text-color);
 }
 
 .logo-container {
@@ -97,22 +66,23 @@ body {
   height: 40px;
 }
 
-.logo-svg {
+.emoji-logo {
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   height: 100%;
 }
 
-.logo-svg-small {
-  width: 36px;
-  height: 36px;
+.message-avatar .emoji-logo {
+  font-size: 1.75rem;
 }
-
 
 #chatMessages {
   padding-bottom: 20px;
   scroll-behavior: smooth;
 }
-
 
 .chat-message {
   display: flex;
@@ -142,22 +112,25 @@ body {
 
 .message-bubble {
   padding: 12px 16px;
-  border-radius: 18px;
+  border-radius: 20px;
   max-width: 100%;
   word-wrap: break-word;
 }
 
 .bot-message .message-bubble {
-  background-color: var(--card-bg);
-  border: 1px solid var(--border-color);
-  color: var(--text-light);
-  border-top-left-radius: 4px;
+  background-color: #935073;
+  color: white;
+  border: none;
+  border-bottom-left-radius: 5px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .user-message .message-bubble {
-  background-color: var(--primary-color);
+  background-color: #8BC34A;
   color: white;
-  border-top-right-radius: 4px;
+  border-radius: 20px;
+  border-bottom-right-radius: 5px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   margin-left: auto;
 }
 
@@ -171,7 +144,6 @@ body {
 .bot-message .message-time {
   align-self: flex-start;
 }
-
 
 .message-bubble p {
   margin-bottom: 0.75rem;
@@ -190,19 +162,7 @@ body {
   margin-bottom: 0;
 }
 
-.suggestion-btn {
-  font-size: 0.85rem;
-  padding: 0.375rem 0.75rem;
-  border-radius: 18px;
-  white-space: nowrap;
-  margin-bottom: 0.5rem;
-  transition: all 0.2s ease-in-out;
-}
-
-.suggestion-btn:hover {
-  transform: translateY(-2px);
-}
-
+/* Input area */
 .chat-input-area {
   background-color: var(--bg-dark);
 }
@@ -220,8 +180,7 @@ body {
 }
 
 #messageInput:focus {
-  box-shadow: 0 0 0 0.25rem rgba(94, 23, 235, 0.25);
-  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.25rem rgba(147, 80, 115, 0.25);
 }
 
 .chat-form .btn {
@@ -234,7 +193,6 @@ body {
   justify-content: center;
   margin-left: 8px;
 }
-
 
 .typing-indicator {
   display: flex;
@@ -273,7 +231,6 @@ body {
   }
 }
 
-
 .message-feedback {
   display: flex;
   gap: 10px;
@@ -300,20 +257,23 @@ body {
   color: var(--primary-color);
 }
 
+:root[data-bs-theme="dark"] .bot-message .message-bubble,
+:root[data-bs-theme="light"] .bot-message .message-bubble {
+  background-color: #935073;
+  color: white;
+  border: none;
+}
+
+:root[data-bs-theme="dark"] .user-message .message-bubble,
+:root[data-bs-theme="light"] .user-message .message-bubble {
+  background-color: #8BC34A;
+  color: white;
+  border: none;
+}
 
 @media (max-width: 768px) {
   .message-content {
     max-width: 90%;
-  }
-
-  #suggestionArea {
-    overflow-x: auto;
-    white-space: nowrap;
-    padding-bottom: 0.5rem;
-  }
-
-  .suggestion-btn {
-    margin-bottom: 0;
   }
 }
 

@@ -23,6 +23,17 @@
   --button-text: #212529;
 }
 
+:root[data-bs-theme="dark"] {
+  --primary-color: #935073;
+  --primary-dark: #7d3a58;
+  --secondary-color: #8BC34A;
+  --bg-dark: #121212;
+  --card-bg: #1e1e1e;
+  --text-light: #f8f9fa;
+  --text-muted: #a7a7a7;
+  --border-color: #343a40;
+}
+
 body {
   background-color: var(--bg-color);
   color: var(--text-color);

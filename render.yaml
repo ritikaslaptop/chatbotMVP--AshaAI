@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: jobsforher-chatbot
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: jobsforher-db
+          property: connectionString
+      - key: PYTHON_VERSION
+        value: 3.9
+
+databases:
+  - name: jobsforher-db
+    databaseName: jobsforher
+    user: jobsforher

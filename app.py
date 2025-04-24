@@ -13,11 +13,12 @@ from models import Interaction, BiasDetection, MetricsTracker
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+database_url = os.environ.get("DATABASE_URL", "sqlite:///temp.db")  # Fallback for local dev
 
 #init flask
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'your_secret_key')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
+app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.permanent_session_lifetime = timedelta(hours=1)
 
@@ -166,6 +167,7 @@ def feedback():
             db.session.rollback()
         logger.error(f"Error recording feedback: {e}")
         return jsonify({'error': str(e)}), 500
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+
+if __name__ == "__main__":
+    app.run(debug=os.environ.get("DEBUG", "False").lower() == "true")
                                                                                        #works :)

@@ -68,7 +68,7 @@ def process_user_message(
 def _build_search_query(user_message: str, context: dict) -> str:
     query = user_message
 
-    relevant_entity_types = ['job_role', 'location', 'skill', 'industry', 'event_type']
+    relevant_entity_types = ['job_role', 'location', 'skill', 'industry']
     context_additions = []
 
     for entity_type in relevant_entity_types:
@@ -111,7 +111,7 @@ def _generate_response(
         welcome_messages = [
             f"{greeting}I'm Asha, your friendly career assistant at JobsForHer. How can I support your professional journey today?",
             f"{greeting}Welcome to JobsForHer! I'm Asha, and I'm here to help you find opportunities that match your career goals.",
-            f"{greeting}It's wonderful to meet you! I'm Asha, your career assistant. I'd love to help you discover job listings, events, or mentorship programs.",
+            f"{greeting}It's wonderful to meet you! I'm Asha, your career assistant. I'd love to help you discover job listings!",
             f"{greeting}I'm delighted you're here! I'm Asha, and I'm dedicated to helping you grow professionally through JobsForHer's resources."
         ]
         return random.choice(welcome_messages)
@@ -141,8 +141,7 @@ def _generate_response(
     if not search_results:
         main_response = (
             "I couldn't find specific information related to your query. "
-            "Would you like to know about job opportunities, upcoming events, "
-            "or mentorship programs available on JobsForHer?"
+            "Would you please elaborate more?"
         )
     else:
         top_results = search_results[:3]
@@ -181,9 +180,6 @@ def _identify_query_type(user_message: str, search_results: list) -> str:
                 return 'filtered_job'
 
     job_patterns = r'\b(job|career|position|opening|vacancy|work|employment|hiring|opportunity)\b'
-    event_patterns = r'\b(event|webinar|workshop|conference|session|talk|presentation|meetup)\b'
-    mentorship_patterns = r'\b(mentor|mentorship|guidance|advise|coach|coaching)\b'
-    session_patterns = r'\b(session detail|schedule|timing|agenda|program detail)\b'
 
     location_job_pattern = r'\b(jobs|positions|opportunities|work) (in|at|near) ([a-zA-Z\s]+)\b'
     location_match = re.search(location_job_pattern, user_message.lower())
@@ -200,12 +196,7 @@ def _identify_query_type(user_message: str, search_results: list) -> str:
         if filters.get("has_filters", False):
             return 'filtered_job'
         return 'job'
-    elif re.search(event_patterns, user_message.lower()):
-        return 'event'
-    elif re.search(mentorship_patterns, user_message.lower()):
-        return 'mentorship'
-    elif re.search(session_patterns, user_message.lower()):
-        return 'session'
+
 
     if search_results:
         result_types = {}

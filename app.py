@@ -16,7 +16,12 @@ logger = logging.getLogger(__name__)
 
 #railway connection handling
 database_url = os.environ.get("DATABASE_URL")
-if database_url and database_url.startswith("postgres://"):
+if not database_url:
+    #fallback to SQLite if DATABASE_URL is not set
+    database_url = "sqlite:///temp.db"
+    logger.warning(f"No DATABASE_URL found, using fallback SQLite: {database_url}")
+elif database_url.startswith("postgres://"):
+    #fix: railway's postgres://URLs to work with SQLAlchemy
     database_url = database_url.replace("postgres://", "postgresql://", 1)
     logger.info(f"Using database URL: {database_url}")
 else:

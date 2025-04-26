@@ -165,6 +165,16 @@ def _generate_response(
 
 
 def _identify_query_type(user_message: str, search_results: list) -> str:
+    event_patterns = [
+        r'\b(event|webinar|workshop|conference|meetup|seminar|talk)\b',
+        r'\b(upcoming|scheduled) (events|webinars|workshops|conferences|meetups)\b',
+        r'\b(events|webinars) (in|at|near|on|for) ([a-zA-Z\s]+)\b'
+    ]
+
+    for pattern in event_patterns:
+        if re.search(pattern, user_message.lower()):
+            return 'event'
+
     job_filter_patterns = [
         r'\b(jobs|positions|opportunities) (in|at|near|for|with)\b',
         r'\b(remote|wfh|work from home|hybrid|on-site|in-office) (jobs|positions|work)\b',

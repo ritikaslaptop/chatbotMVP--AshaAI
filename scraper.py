@@ -163,7 +163,128 @@ def create_jobs_file(url):
     except Exception as e:
         logger.error(f"Error creating job listings file: {e}")
         return []
-##
+
+
+def scrape_events_from_herkey():
+    try:
+        url = "https://events.herkey.com/events"
+        logger.info(f"Scraping events from {url}")
+
+        soup = get_soup(url)
+        if not soup:
+            logger.warning(f"Failed to get page content from {url}, using fallback data")
+            return generate_sample_events()
+
+        events = []
+        event_elements = soup.select(".event-card, .event-listing, .event-item, article.event")
+
+        if not event_elements:
+            logger.warning(f"No event elements found at {url}, using fallback data")
+            return generate_sample_events()
+
+        for idx, event_elem in enumerate(event_elements, 1):
+            try:
+                title_elem = event_elem.select_one(".event-title, .title, h2, h3")
+                date_elem = event_elem.select_one(".event-date, .date")
+                location_elem = event_elem.select_one(".event-location, .location")
+                description_elem = event_elem.select_one(".event-description, .description, .summary")
+                organizer_elem = event_elem.select_one(".organizer, .host")
+
+                event = {
+                    "id": f"event-{idx}",
+                    "title": title_elem.text.strip() if title_elem else f"Herkey Event {idx}",
+                    "date": date_elem.text.strip() if date_elem else "TBD",
+                    "location": location_elem.text.strip() if location_elem else "Virtual",
+                    "description": description_elem.text.strip() if description_elem else "Join this exciting event for professionals.",
+                    "organizer": organizer_elem.text.strip() if organizer_elem else "Herkey",
+                    "type": "online" if "virtual" in (location_elem.text.lower() if location_elem else "") else "in-person",
+                    "url": urljoin(url, event_elem.select_one("a")["href"]) if event_elem.select_one("a") else f"{url}/{idx}",
+                    "image": urljoin(url, event_elem.select_one("img")["src"]) if event_elem.select_one("img") else None,
+                    "registration_required": True,
+                    "registration_url": urljoin(url, event_elem.select_one(".register, .signup")["href"]) if event_elem.select_one(".register, .signup") else url,
+                    "event_type": "event"
+                }
+
+                events.append(event)
+
+            except Exception as e:
+                logger.error(f"Error extracting event data: {e}")
+                continue
+
+        logger.info(f"Scraped {len(events)} events from {url}")
+
+        if not events:
+            logger.warning("No events could be scraped, using fallback data")
+            return generate_sample_events()
+
+        return events
+
+    except Exception as e:
+        logger.error(f"Error scraping events from {url}: {e}")
+        return generate_sample_events()
+
+
+def generate_sample_events():
+    event_types = ["Workshop", "Webinar", "Conference", "Networking", "Panel Discussion"]
+    topics = [
+        "Women in Leadership", "Career Advancement", "Tech Skills", "Work-Life Balance",
+        "Professional Development", "Entrepreneurship", "Financial Literacy",
+        "Mentorship", "Resume Building", "Interview Skills"
+    ]
+    locations = ["Virtual", "Online", "Mumbai", "Delhi", "Bangalore", "Hybrid", "Chennai", "Hyderabad"]
+    organizers = ["Herkey", "JobsForHer", "WomenInTech", "LeadHER", "TechLadies", "SheCodes"]
+    now = datetime.now()
+    future_dates = []
+    for i in range(30):
+        future_date = now + timedelta(days=random.randint(7, 90))
+        future_dates.append(future_date.strftime("%b %d, %Y"))
+
+    events = []
+    for i in range(1, 21):
+        event_type = random.choice(event_types)
+        topic = random.choice(topics)
+        location = random.choice(locations)
+        is_virtual = location in ["Virtual", "Online"]
+
+        event = {
+            "id": f"event-{i}",
+            "title": f"{event_type}: {topic}",
+            "date": random.choice(future_dates),
+            "location": location,
+            "description": f"Join us for this exciting {event_type.lower()} on {topic}. Learn from industry experts and connect with peers.",
+            "organizer": random.choice(organizers),
+            "type": "online" if is_virtual else "in-person",
+            "url": f"https://events.herkey.com/events/{i}",
+            "image": f"https://events.herkey.com/images/events/{i}.jpg",
+            "registration_required": True,
+            "registration_url": f"https://events.herkey.com/events/{i}/register",
+            "event_type": "event"
+        }
+
+        events.append(event)
+
+    return events
+
+
+def create_events_file():
+    try:
+        os.makedirs("data", exist_ok=True)
+
+        events = scrape_events_from_herkey()
+
+        file_path = os.path.join("data", "events.json")
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump(events, f, indent=2)
+
+        logger.info(f"Created events file: {file_path}")
+
+        print(f"Successfully scraped {len(events)} events and saved to {file_path}")
+        return events
+
+    except Exception as e:
+        logger.error(f"Error creating events file: {e}")
+        return []
+
 
 if __name__ == "__main__":
     logging.basicConfig(

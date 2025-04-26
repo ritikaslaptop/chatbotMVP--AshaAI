@@ -181,6 +181,38 @@ def feedback():
         logger.error(f"Error recording feedback: {e}")
         return jsonify({'error': str(e)}), 500
 
+
+@app.route('/api/events', methods=['GET'])
+def get_events():
+    try:
+        from events import search_events
+
+        query = request.args.get('q', '')
+        event_type = request.args.get('type', '')
+        location = request.args.get('location', '')
+        limit = int(request.args.get('limit', 10))
+
+        events_list = search_events(
+            query=query,
+            event_type=event_type,
+            location=location,
+            limit=limit
+        )
+
+        return jsonify({
+            'events': events_list,
+            'count': len(events_list),
+            'source': 'events.herkey.com'
+        })
+
+    except Exception as e:
+        logger.error(f"Error searching events: {e}")
+        return jsonify({
+            'error': 'Failed to search events',
+            'message': str(e)
+        }), 500
+
+
 if __name__ == "__main__":
     app.run(debug=os.environ.get("DEBUG", "False").lower() == "true")
                                                                                        #works :)

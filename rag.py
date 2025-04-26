@@ -1,24 +1,16 @@
 import os
 import logging
 import re
-from typing import List, Dict, Any, Optional
 
 logger = logging.getLogger(__name__)
-
-
-# Use simple keyword-based search instead of sentence transformers
-def semantic_search(query: str, knowledge_base: Dict[str, List[Dict[str, Any]]], top_k: int = 5) -> List[
-    Dict[str, Any]]:
-
+def semantic_search(query, knowledge_base, top_k=5):
     try:
         all_documents = []
         for knowledge_type, items in knowledge_base.items():
             for item in items:
-
                 item_with_type = item.copy()
                 item_with_type['type'] = knowledge_type.rstrip('s')  #jobs to job
                 all_documents.append(item_with_type)
-
 
         if not all_documents:
             logger.warning("No documents in knowledge base for search")
@@ -28,10 +20,7 @@ def semantic_search(query: str, knowledge_base: Dict[str, List[Dict[str, Any]]],
 
         results = []
         for doc in all_documents:
-
             doc_text = _get_document_text(doc)
-
-
             doc_keywords = set(re.findall(r'\b\w+\b', doc_text.lower()))
             matches = len(query_keywords.intersection(doc_keywords))
 
@@ -48,7 +37,7 @@ def semantic_search(query: str, knowledge_base: Dict[str, List[Dict[str, Any]]],
         return []
 
 
-def _get_document_text(doc: Dict[str, Any]) -> str:
+def _get_document_text(doc):
     doc_type = doc.get('type', 'unknown')
 
     if doc_type == 'job':

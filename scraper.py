@@ -1,9 +1,11 @@
 import logging
 import requests
+import random
 import uuid
 import json
 import re
-from datetime import datetime
+import os
+from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 
@@ -44,7 +46,6 @@ def scrape_job_listings(url):
             return _get_fallback_job_data()
 
         job_listings = []
-
         job_elements = soup.select(".job-card, .job-listing, .job-item, article.job")
 
         if not job_elements:
@@ -144,9 +145,12 @@ def _get_fallback_job_data():
     ]
 
 
-def create_jobs_file(url):
+def create_jobs_file(url=None):
     try:
-        import os
+        if url is None:
+            url = "https://www.herkey.com/jobs"
+            logger.info(f"No URL provided, using default: {url}")
+
         os.makedirs("data", exist_ok=True)
 
         jobs = scrape_job_listings(url)
@@ -291,3 +295,6 @@ if __name__ == "__main__":
         level=logging.INFO,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
+#test
+    create_jobs_file()
+    create_events_file()

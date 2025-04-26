@@ -19,6 +19,8 @@ from job_filter import (
     format_filter_summary
 )
 
+from events import search_events, format_event_response
+
 logger = logging.getLogger(__name__)
 
 
@@ -31,6 +33,10 @@ def process_user_message(
         guardrail_response = apply_all_guardrails(user_message)
         if guardrail_response:
             return guardrail_response, context
+
+        event_response = _check_for_event_query(user_message, context)
+        if event_response:
+            return event_response, context
 
         entities = extract_entities(user_message)
 
@@ -63,6 +69,61 @@ def process_user_message(
     except Exception as e:
         logger.error(f"Error processing message: {e}")
         return "I'm sorry, I encountered an issue processing your request. Please try again.", context
+
+
+def _check_for_event_query(user_message: str, context: dict) -> str:
+    message_lower = user_message.lower()
+
+    event_keywords = ["event", "webinar", "workshop", "conference", "meetup", "seminar",
+                      "session", "talk", "panel", "discussion", "networking"]
+
+    if any(keyword in message_lower for keyword in event_keywords):
+        try:
+            event_type = None
+            location = None
+
+            for possible_type in ["webinar", "workshop", "conference", "meetup", "networking", "panel"]:
+                if possible_type in message_lower:
+                    event_type = possible_type
+                    break
+
+            location_match = re.search(r"in\s+([a-zA-Z\s]+)", message_lower)
+            if location_match:
+                location = location_match.group(1).strip()
+
+            for possible_location in ["virtual", "online", "in-person", "remote", "hybrid"]:
+                if possible_location in message_lower:
+                    location = possible_location
+                    break
+
+            events = search_events(
+                query=user_message,
+                event_type=event_type,
+                location=location
+            )
+
+            response = format_event_response(events)
+
+            context["last_topic"] = "events"
+            context["events_shown"] = [e["id"] for e in events[:5]] if events else []
+
+            logger.info(f"Found {len(events)} events matching query: '{user_message}'")
+
+            if 'history' not in context:
+                context['history'] = []
+            context['history'].append({'role': 'user', 'content': user_message})
+            context['history'].append({'role': 'assistant', 'content': response})
+
+            if len(context['history']) > 10:
+                context['history'] = context['history'][-10:]
+
+            return response
+
+        except Exception as e:
+            logger.error(f"Error processing event query: {e}")
+            return None
+
+    return None
 
 
 def _build_search_query(user_message: str, context: dict) -> str:
@@ -120,10 +181,10 @@ def _generate_response(
         import random
         care_reminders = [
             "Remember to stay hydrated! 💧 ",
-            "Don't forget to take short breaks between tasks. ⏱️ ",
+            "Don't forget to take short breaks between tasks⏱️ ",
             "Remember to stretch occasionally! 🧘‍♀️ ",
-            "Take a moment to breathe deeply. 🌬️ ",
-            "Your wellbeing matters - make sure to rest when needed. 😊 "
+            "Take a moment to breathe deeply 🌬️ ",
+            "Your wellbeing matters - make sure to rest when needed😊 "
         ]
         reminder = random.choice(care_reminders)
 
@@ -206,7 +267,6 @@ def _identify_query_type(user_message: str, search_results: list) -> str:
         if filters.get("has_filters", False):
             return 'filtered_job'
         return 'job'
-
 
     if search_results:
         result_types = {}

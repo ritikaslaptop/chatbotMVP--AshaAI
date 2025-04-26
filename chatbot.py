@@ -97,14 +97,14 @@ def _generate_response(
     if is_new_conversation:
         import random
         welcome_treats = [
-            "🌸 Here's a virtual flower to brighten your day! ",
-            "🌹 I picked this rose just for you! ",
-            "🌷 Please accept this tulip as a warm welcome! ",
-            "🌺 A beautiful hibiscus for a beautiful day ahead! ",
-            "🍪 Have a virtual cookie to energize your career journey! ",
-            "🧁 Enjoy this cupcake while we chat about your career! ",
-            "🍩 A sweet donut to make our conversation even sweeter! ",
-            "🥐 A fresh croissant to start our career discussion! "
+            "(づᴗ _ᴗ)づ🌸: Here's a virtual flower to brighten your day! ",
+            "(づᴗ _ᴗ)づ🌹:I picked this rose just for you! ",
+            "(づᴗ _ᴗ)づ🌷: Please accept this tulip as a warm welcome! ",
+            "(づᴗ _ᴗ)づ🌺: A beautiful hibiscus for a beautiful day ahead! ",
+            "(づᴗ _ᴗ)づ🍪: Have a virtual cookie to energize your career journey! ",
+            "(づᴗ _ᴗ)づ🧁: Enjoy this cupcake while we chat about your career! ",
+            "(づᴗ _ᴗ)づ🍩: A sweet donut to make our conversation even sweeter! ",
+            "(づᴗ _ᴗ)づ🥐: A fresh croissant to start our career discussion! "
         ]
         greeting = random.choice(welcome_treats)
 

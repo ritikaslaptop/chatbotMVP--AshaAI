@@ -24,4 +24,4 @@ class MetricsTracker(db.Model):
     filtered_job_searches = db.Column(db.Integer, default=0)
     event_searches = db.Column(db.Integer, default=0)
     mentorship_searches = db.Column(db.Integer, default=0)
-    bias_detections = db.Column(db.Integer, default=0)
+    bias_detections = db.Column(db.Integer, default=0) #works

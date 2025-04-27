@@ -278,4 +278,4 @@ def _identify_query_type(user_message: str, search_results: list) -> str:
             most_common_type = max(result_types.items(), key=lambda x: x[1])[0]
             return most_common_type
 
-    return 'general'
+    return 'general' #works

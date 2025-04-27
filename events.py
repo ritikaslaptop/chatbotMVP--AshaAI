@@ -208,4 +208,4 @@ def get_events_by_organizer(organizer, limit=5):
         return []
 
     filtered = [event for event in events if organizer.lower() in event.get('organizer', '').lower()]
-    return filtered[:limit]
+    return filtered[:limit] #worksyey

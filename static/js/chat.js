@@ -139,6 +139,50 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    //add form to the chat interface
+    function addFormToChat(formHtml) {
+        const timestamp = getCurrentTime();
+
+        const formContainer = document.createElement('div');
+        formContainer.className = 'chat-message bot-message';
+        formContainer.innerHTML = `
+            <div class="message-avatar">
+                <svg class="logo-svg-small" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="25" cy="25" r="20" fill="#5E17EB" />
+                    <path d="M15 25C15 20 20 15 25 15C30 15 35 20 35 25C35 30 30 35 25 35" stroke="white" stroke-width="2" fill="none" />
+                    <circle cx="25" cy="25" r="3" fill="white" />
+                    <path d="M25 35V40" stroke="white" stroke-width="2" />
+                    <path d="M20 40H30" stroke="white" stroke-width="2" />
+                </svg>
+            </div>
+            <div class="message-content">
+                <div class="message-bubble form-container">
+                    ${formHtml}
+                </div>
+                <div class="message-time">
+                    ${timestamp}
+                </div>
+            </div>
+        `;
+
+        chatMessages.appendChild(formContainer);
+
+        //setup form submission handling
+        const form = formContainer.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                // Don't prevent default - let form submit to external URL
+                setTimeout(() => {
+                    addBotMessage(
+                        "Thank you for signing up with HerKey! Your profile is being created.",
+                        "signup-confirmation-" + Date.now()
+                    );
+                }, 1000);
+            });
+        }
+
+        scrollToBottom();
+    }
 
     function formatMessage(text) {
 

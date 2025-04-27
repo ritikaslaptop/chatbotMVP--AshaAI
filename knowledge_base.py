@@ -76,23 +76,4 @@ def get_all_text_content(knowledge_base):
 
             all_texts.append(text)
 
-    return all_texts
-
-
-def update_knowledge_file(knowledge_type, data):
-    try:
-        if knowledge_type not in KNOWLEDGE_FILES:
-            logger.error(f"Invalid knowledge type: {knowledge_type}")
-            return False
-
-        file_path = os.path.join(DATA_DIR, KNOWLEDGE_FILES[knowledge_type])
-
-        with open(file_path, 'w', encoding='utf-8') as f:
-            json.dump(data, f, indent=2)
-
-        logger.info(f"Updated knowledge file: {file_path} with {len(data)} items")
-        return True
-
-    except Exception as e:
-        logger.error(f"Error updating knowledge file: {e}")
-        return False
+    return all_texts #works

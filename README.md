@@ -53,8 +53,8 @@ The assistant processes natural language queries to provide relevant information
 - **Comprehensive Filtering**: Filters results by job type, location, industry, and skill level
 - **RAG-based Information Retrieval**: Uses Retrieval Augmented Generation through regex keyword matching for relevant information
 - **Advanced Bias Detection**: Uses over 100 regex patterns to detect and prevent any form of toxicity, gender bias, stereotypes, and inappropriate language
-- **Guardrails Implementation**: Redirects off-topic queries back to career-focused conversations
-- **Inspirational Quotes**: Displays random motivational quotes from women leaders during each session
+- **Guardrails Implementation**: Redirects off-topic queries back to career-focused conversations (100+ regexes implemented)
+- **Inspirational Quotes**: Displays random motivational quotes during each session
 - **Privacy Protection**: Sessions are anonymized and automatically deleted after 30 minutes of inactivity
 - **Interactive Feedback**: Users can provide thumbs up/down feedback on responses
 - **Light/Dark Mode Toggle**: Adjustable interface for comfortable viewing

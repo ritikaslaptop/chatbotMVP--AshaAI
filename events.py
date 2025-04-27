@@ -9,16 +9,15 @@ logger = logging.getLogger(__name__)
 
 def load_events():
     try:
-        file_path = os.path.join("data", "events.json")
-        if not os.path.exists(file_path):
-            logger.warning(f"{file_path} not found, returning empty dataset")
+        events_path = os.path.join('data', 'events.json')
+        if os.path.exists(events_path):
+            with open(events_path, 'r') as file:
+                events = json.load(file)
+                logger.info(f"Loaded {len(events)} event records")
+                return events
+        else:
+            logger.warning(f"Events file not found at {events_path}")
             return []
-
-        with open(file_path, 'r') as f:
-            events = json.load(f)
-
-        logger.info(f"Loaded {len(events)} event records")
-        return events
     except Exception as e:
         logger.error(f"Error loading events: {e}")
         return []

@@ -82,4 +82,4 @@ def format_filter_summary(filters):
     if not parts:
         return ""
 
-    return "Found " + ", ".join(parts) + "."
+    return "Found " + ", ".join(parts) + "." #worksfiree

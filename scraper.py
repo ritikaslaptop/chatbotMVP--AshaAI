@@ -296,5 +296,5 @@ if __name__ == "__main__":
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
 #test
-    create_jobs_file()
+    create_jobs_file() #yeeworks
     create_events_file()

@@ -40,7 +40,10 @@ The assistant processes natural language queries to provide relevant information
 <b>Hallucination Handling</b>
 <br>
 <img width="500" src="https://github.com/user-attachments/assets/b8f10ff9-d70e-48f7-93e4-63393abc3a89" alt="/queue"/>
-  
+<br><br>
+<b>In-Chat Registration for new users</b>
+<br>
+<img width="500" src="https://github.com/user-attachments/assets/1d92bd58-be7b-4100-98c0-f73cd0f0e4de" alt="/queue"/>
 <hr>
 </details>
 <br>

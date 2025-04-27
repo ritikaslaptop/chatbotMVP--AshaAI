@@ -253,4 +253,4 @@ def get_events():
 
 
 if __name__ == "__main__":
-    app.run(debug=os.environ.get("DEBUG", "False").lower() == "true")
+    app.run(debug=os.environ.get("DEBUG", "False").lower() == "true")  #works

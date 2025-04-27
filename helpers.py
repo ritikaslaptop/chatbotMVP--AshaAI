@@ -29,7 +29,7 @@ def extract_entities(text):
     if skills:
         entities['skill'] = skills
 
-    industries = re.findall(#
+    industries = re.findall(
         r'\b(technology|finance|healthcare|education|retail|manufacturing|media|hospitality|government|non-profit|consulting|engineering|pharmaceutical|telecommunications|energy)\b',
         text.lower()
     )

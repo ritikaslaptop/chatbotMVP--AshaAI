@@ -1,6 +1,7 @@
 import logging
 import re
 import random
+from bias_detector import detect_bias
 
 from rag import semantic_search
 from guardrails import (
@@ -174,6 +175,7 @@ def _generate_response(
             "(づᴗ _ᴗ)づ🍩: A sweet donut to make our conversation even sweeter! ",
             "(づᴗ _ᴗ)づ🥐: A fresh croissant to start our career discussion! "
         ]
+        greeting = random.choice(welcome_treats)
         greeting = random.choice(welcome_treats)
 
         welcome_messages = [

@@ -11,34 +11,34 @@ import logging
 from extensions import db
 from models import Interaction, BiasDetection, MetricsTracker
 from scraper import create_jobs_file, create_events_file
+from rag import process_signup_trigger, generate_response, semantic_search
+from events import filter_events, load_events
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-#better URL handling
+# better URL handling
 database_url = os.environ.get("DATABASE_URL")
-if not database_url:
-    #fallback to SQLite if DATABASE_URL is not set
+if not database_url:  # fallback to SQLite if DATABASE_URL is not set
     database_url = "sqlite:///temp.db"
     logger.warning(f"No DATABASE_URL found, using fallback SQLite: {database_url}")
 elif database_url.startswith("postgres://"):
-    #fix: railway's postgres://URLs to work with SQLAlchemy
+    # fix: railway's postgres://URLs to work with SQLAlchemy
     database_url = database_url.replace("postgres://", "postgresql://", 1)
     logger.info(f"Converted DATABASE_URL format for SQLAlchemy")
 
 logger.info(
     f"Using database URL (masked): {database_url[:10]}...{database_url[-10:] if len(database_url) > 20 else ''}")
 
-#init flask
+# init flask
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'your_secret_key')
 app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.permanent_session_lifetime = timedelta(hours=1)
-
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1)
 db.init_app(app)
 
-#ensuring the tables are created
+# ensuring the tables are created
 with app.app_context():
     try:
         db.create_all()
@@ -150,6 +150,31 @@ def chat():
             )
             update_session_context(session, updated_context)
 
+            #create a combined knowledge base with events if needed
+            combined_knowledge_base = knowledge_base.copy()
+
+            #for event-related queries, load and add events to the knowledge base
+            if response_type == 'event' or 'event' in user_message.lower():
+                events = load_events()
+                event_results, _ = filter_events(
+                    events=events,
+                    query=user_message,
+                    event_type=None,
+                    location=None if 'location' not in user_message.lower() else user_message.split('in ')[-1].strip(),
+                    limit=10
+                )
+
+                if event_results:
+                    logger.info(f"Adding {len(event_results)} events to knowledge base")
+                    combined_knowledge_base['events'] = event_results
+
+            #get search results using the combined knowledge base
+            results = semantic_search(user_message, combined_knowledge_base, session.get('id'))
+
+            #generate response with sign-up encouragement if applicable
+            if response_type in ['job', 'event', 'bye']:
+                response = generate_response(user_message, results, response_type)
+
             interaction_id = str(uuid.uuid4())
             timestamp = datetime.now()
 
@@ -191,7 +216,17 @@ def chat():
                 db.session.add(MetricsTracker(**metric_data))
             db.session.commit()
 
-            return jsonify({'id': interaction_id, 'message': response, 'timestamp': timestamp.isoformat()})
+            response_data = {
+                'id': interaction_id,
+                'message': response,
+                'timestamp': timestamp.isoformat()
+            }
+
+            # Check if the message contains a signup trigger
+            if "<signup_trigger>" in response:
+                response_data["has_signup_trigger"] = True
+
+            return jsonify(response_data)
 
     except Exception as e:
         if 'db' in locals() and db.session.is_active:
@@ -201,6 +236,8 @@ def chat():
             'message': "I'm sorry, I encountered an error processing your request. Please try again.",
             'error': str(e)
         }), 500
+
+
 @app.route('/api/feedback', methods=['POST'])
 def feedback():
     try:
@@ -242,23 +279,30 @@ def feedback():
 @app.route('/api/events', methods=['GET'])
 def get_events():
     try:
-        from events import search_events
+        from events import filter_events, load_events
 
         query = request.args.get('q', '')
         event_type = request.args.get('type', '')
         location = request.args.get('location', '')
         limit = int(request.args.get('limit', 10))
 
-        events_list = search_events(
+        events = load_events()
+        filtered_events, security_message = filter_events(
+            events=events,
             query=query,
             event_type=event_type,
             location=location,
             limit=limit
         )
 
+        if security_message:
+            return jsonify({
+                'error': security_message
+            }), 400
+
         return jsonify({
-            'events': events_list,
-            'count': len(events_list),
+            'events': filtered_events,
+            'count': len(filtered_events),
             'source': 'events.herkey.com'
         })
 
@@ -276,4 +320,4 @@ def render_form():
 
 
 if __name__ == "__main__":
-    app.run(debug=os.environ.get("DEBUG", "False").lower() == "true")  #works
+    app.run(debug=os.environ.get("DEBUG", "False").lower() == "true")  # works

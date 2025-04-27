@@ -1,11 +1,11 @@
-import json
-import logging
 import os
 import re
+import json
+import logging
 from datetime import datetime
+from security import detect_sql_injection, detect_xss, sanitize_input, sanitize_html
 
 logger = logging.getLogger(__name__)
-
 
 def load_events():
     try:
@@ -21,6 +21,55 @@ def load_events():
     except Exception as e:
         logger.error(f"Error loading events: {e}")
         return []
+
+def search_events(query=None, event_type=None, location=None):
+    events = load_events()
+    logger.info(f"Searching events with: query={query}, type={event_type}, location={location}")
+
+    if query and any(phrase in query.lower() for phrase in ["show me events", "list events", "events"]):
+        logger.info(f"General event request detected, returning all events")
+        return events[:10]
+
+    if not query and not event_type and not location:
+        logger.info(f"No search criteria provided, returning all {len(events)} events")
+        return events[:10]
+    if not query and not event_type and not location:
+        logger.info(f"No search criteria provided, returning all {len(events)} events")
+        return events[:10]
+    if not events:
+        logger.info("No events found in the data source")
+        return []
+
+
+    if events and len(events) > 0:
+        logger.debug(f"Sample event data structure: {events[0]}")
+
+    results = []
+    for event in events:
+        if not isinstance(event, dict):
+            continue
+        match = True
+
+        if query and query.strip():
+            event_text = f"{event.get('title', '')} {event.get('description', '')}".lower()
+            if query.lower() not in event_text:
+                match = False
+
+        if event_type and event_type.strip():
+            event_type_value = event.get('type', '').lower()
+            if not event_type_value or event_type.lower() not in event_type_value:
+                match = False
+
+        if location and location.strip():
+            event_location = event.get('location', '').lower()
+            if not event_location or location.lower() not in event_location:
+                match = False
+
+        if match:
+            results.append(event)
+
+    logger.info(f"Found {len(results)} matching events")
+    return results
 
 
 def is_event_query(message):
@@ -79,44 +128,42 @@ def parse_event_query(message):
     return query_params
 
 
-def search_events(query=None, event_type=None, location=None, limit=5):
-    events = load_events()
-    if not events:
-        logger.warning("No events found in database")
-        return []
+def filter_events(events, query='', event_type='', location='', limit=10):
+    security_message = None
+    filtered_events = events
 
-    logger.info(f"Searching events with: query={query}, type={event_type}, location={location}")
+    if not query and not event_type and not location:
+        logger.info(f"No search criteria provided, returning all {len(events)} events")
+        return events[:limit], security_message
 
-    if not any([query, event_type, location]):
-        logger.info(f"No search criteria provided, returning {min(limit, len(events))} events")
-        return events[:limit]
+    if any(char in str(query or '') + str(event_type or '') + str(location or '') for char in ['<', '>', ';', '--']):
+        security_message = "Invalid characters detected in search query"
+        return [], security_message
 
-    filtered = []
-    for event in events:
-        if event_type and ('type' not in event or not _text_contains(event['type'], event_type)):
-            continue
+    query = query.lower().strip()
+    event_type = event_type.lower().strip()
+    location = location.lower().strip()
 
-        if location and ('location' not in event or not _text_contains(event['location'], location)):
-            continue
+    if query:
+        filtered_events = [
+            event for event in filtered_events
+            if query in event.get('title', '').lower() or
+               query in event.get('description', '').lower()
+        ]
 
-        if query:
-            search_fields = [
-                event.get('title', ''),
-                event.get('description', ''),
-                event.get('organizer', ''),
-                event.get('type', '')
-            ]
+    if event_type:
+        filtered_events = [
+            event for event in filtered_events
+            if event_type in event.get('type', '').lower()
+        ]
 
-            if not any(_text_contains(field, query) for field in search_fields):
-                continue
+    if location:
+        filtered_events = [
+            event for event in filtered_events
+            if location in event.get('location', '').lower()
+        ]
 
-        filtered.append(event)
-        if len(filtered) >= limit:
-            break
-
-    logger.info(f"Found {len(filtered)} matching events")
-    return filtered
-
+    return filtered_events[:limit], security_message
 
 def _text_contains(text, substring): #helper funcn
     if not text or not substring:
@@ -124,21 +171,31 @@ def _text_contains(text, substring): #helper funcn
     return substring.lower() in text.lower()
 
 
-def format_event_response(events):
+def format_event_response(events, security_message=None):
+    if security_message:
+        return security_message
+
     if not events:
         return "I couldn't find any events matching your criteria. Please try different search terms. 🔍"
 
     response = "✨ Here are some upcoming events from Herkey that might interest you: ✨\n\n"
 
     for i, event in enumerate(events[:5], 1):
-        response += f"{i}. {event['title']}\n"
-        response += f"   📅 Date: {event['date']}\n"
-        response += f"   📍 Location: {event['location']}\n"
-        response += f"   👥 Organizer: {event['organizer']}\n"
+        #sanitize event details
+        title = sanitize_html(event['title'])
+        date = sanitize_html(event['date'])
+        location = sanitize_html(event['location'])
+        organizer = sanitize_html(event['organizer'])
+
+        response += f"{i}. {title}\n"
+        response += f"   📅 Date: {date}\n"
+        response += f"   📍 Location: {location}\n"
+        response += f"   👥 Organizer: {organizer}\n"
 
         desc = event.get('description', '')
         if len(desc) > 100:
             desc = desc[:97] + "..."
+        desc = sanitize_html(desc)
         response += f"   📝 {desc}\n\n"
 
     response += "🌟 You can register for these events through the Herkey events portal, hope to see you there! 🌟"

@@ -21,11 +21,9 @@ document.addEventListener('DOMContentLoaded', () => {
         themeToggle.innerHTML = `<i class="fas fa-${newTheme === 'dark' ? 'moon' : 'sun'} me-1"></i> Toggle Theme`;
     });
 
-
     const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
     document.getElementById('quoteText').textContent = `"${randomQuote.text}"`;
     document.getElementById('quoteAuthor').textContent = `- ${randomQuote.author}`;
-
 
     const chatForm = document.getElementById('chatForm');
     const messageInput = document.getElementById('messageInput');
@@ -34,16 +32,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const suggestionBtns = document.querySelectorAll('.suggestion-btn');
     const clearChatBtn = document.getElementById('clearChat');
 
-
     let chatHistory = [];
     let currentMessageId = null;
 
-
     initChat();
 
-
     function initChat() {
-
         messageInput.focus();
         chatForm.addEventListener('submit', handleFormSubmit);
         messageInput.addEventListener('keydown', handleInputKeydown);
@@ -56,10 +50,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-
         scrollToBottom();
     }
-
 
     function handleFormSubmit(e) {
         e.preventDefault();
@@ -73,14 +65,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-
     function handleInputKeydown(e) {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             chatForm.dispatchEvent(new Event('submit'));
         }
     }
-
 
     function addUserMessage(message) {
         const time = getCurrentTime();
@@ -98,10 +88,16 @@ document.addEventListener('DOMContentLoaded', () => {
         chatHistory.push({ role: 'user', content: message, time });
     }
 
-
-    function addBotMessage(message, id) {
+    function addBotMessage(message, id, additionalOptions = {}) {
         const time = getCurrentTime();
         currentMessageId = id;
+
+        //check if message contains signup trigger
+        let processedMessage = message;
+        if (additionalOptions.has_signup_trigger) {
+            processedMessage = message.replace(/<signup_trigger>(.*?)<\/signup_trigger>/g,
+                '<button class="btn btn-primary btn-sm signup-trigger">$1</button>');
+        }
 
         const messageHtml = `
             <div class="chat-message bot-message">
@@ -115,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </svg>
                 </div>
                 <div class="message-content">
-                    <div class="message-bubble">${formatMessage(message)}</div>
+                    <div class="message-bubble">${formatMessage(processedMessage)}</div>
                     <div class="message-time">${time}</div>
                     <div class="message-feedback" data-message-id="${id}">
                         <button class="feedback-btn" data-feedback="helpful">
@@ -132,11 +128,39 @@ document.addEventListener('DOMContentLoaded', () => {
         appendMessage(messageHtml);
         chatHistory.push({ role: 'assistant', content: message, time, id });
 
-
         const feedbackBtns = document.querySelectorAll(`.message-feedback[data-message-id="${id}"] .feedback-btn`);
         feedbackBtns.forEach(btn => {
             btn.addEventListener('click', () => handleFeedback(id, btn.dataset.feedback));
         });
+
+        //add event listeners to any signup triggers
+        document.querySelectorAll('.signup-trigger').forEach(button => {
+            button.addEventListener('click', handleSignupClick);
+        });
+    }
+
+    //handle signup button click
+    async function handleSignupClick() {
+        showTypingIndicator();
+
+        try {
+            const response = await fetch('/render_form');
+            if (!response.ok) {
+                throw new Error('Failed to load form');
+            }
+
+            const formHtml = await response.text();
+            hideTypingIndicator();
+            addFormToChat(formHtml);
+
+        } catch (error) {
+            console.error('Error loading form:', error);
+            hideTypingIndicator();
+            addBotMessage(
+                "Sorry, I couldn't load the registration form. Please try again later.",
+                "error-" + Date.now()
+            );
+        }
     }
 
     //add form to the chat interface
@@ -185,12 +209,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function formatMessage(text) {
-
         text = text.replace(
             /(https?:\/\/[^\s]+)/g,
             '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'
         );
-
 
         text = text.replace(/\n/g, '<br>');
 
@@ -226,12 +248,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return text;
     }
 
-
     function appendMessage(messageHtml) {
         chatMessages.innerHTML += messageHtml;
         scrollToBottom();
     }
-
 
     function scrollToBottom() {
         chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -275,8 +295,16 @@ document.addEventListener('DOMContentLoaded', () => {
             //hide typing indicator
             hideTypingIndicator();
 
-            //add bot message
-            addBotMessage(data.message, data.id);
+            // Check if form HTML was provided
+            if (data.form_html) {
+                addFormToChat(data.form_html);
+                return;
+            }
+
+            //add bot message with additional options
+            addBotMessage(data.message, data.id, {
+                has_signup_trigger: data.has_signup_trigger || false
+            });
         })
         .catch(error => {
             console.error('Error:', error);
@@ -312,7 +340,7 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             body: JSON.stringify({
                 id: messageId,
-                feedback: feedback
+                feedback: feedback === 'helpful' ? 'positive' : 'negative'
             })
         })
         .then(response => {

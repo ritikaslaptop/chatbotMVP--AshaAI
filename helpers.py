@@ -324,4 +324,4 @@ def _truncate_text(text, max_length=100):
 
 def log_interaction(interaction_id, session_id, user_message, bot_response, timestamp=None, feedback=None):
     logger.debug(f"Interaction logging is now handled by SQLAlchemy in app.py")
-    pass
+    pass #helphelp,nah works :)

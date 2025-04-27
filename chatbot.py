@@ -23,6 +23,13 @@ from events import search_events, format_event_response
 
 logger = logging.getLogger(__name__)
 
+def process_user_input(user_input):
+    is_biased, confidence, bias_message = detect_bias(user_input)
+    if is_biased:
+        return f"Bias detected: {bias_message} (Confidence: {confidence * 100:.1f}%)"
+    else:
+        return "No bias detected. Processing your input..."
+
 
 def process_user_message(
         user_message: str,

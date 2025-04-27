@@ -252,5 +252,10 @@ def get_events():
         }), 500
 
 
+@app.route('/render_form', methods=['GET'])
+def render_form():
+    return render_template('form.html')
+
+
 if __name__ == "__main__":
     app.run(debug=os.environ.get("DEBUG", "False").lower() == "true")  #works

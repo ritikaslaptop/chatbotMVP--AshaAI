@@ -3,7 +3,56 @@ import logging
 import re
 
 logger = logging.getLogger(__name__)
-def semantic_search(query, knowledge_base, top_k=5):
+
+user_sessions = {}
+SESSION_TIMEOUT_SECONDS = 1800
+
+
+def enhance_query_with_context(query, conversation_history, max_history=3):
+    if not conversation_history:
+        return query
+    recent_exchanges = conversation_history[-max_history:]
+    context_text = " ".join([f"{exchange.get('query', '')}" for exchange in recent_exchanges])
+    enhanced_query = f"{query} {context_text}"
+    logger.debug(f"Enhanced query: '{query}' -> '{enhanced_query}'")
+    return enhanced_query
+
+
+def get_or_create_user_session(session_id):
+    current_time = datetime.datetime.now()
+    clean_expired_sessions()
+    if session_id not in user_sessions:
+        user_sessions[session_id] = {
+            'conversation_history': [],
+            'last_activity': current_time
+        }
+    else:
+        user_sessions[session_id]['last_activity'] = current_time
+    return user_sessions[session_id]
+
+
+def clean_expired_sessions():
+    now = datetime.datetime.now()
+    expired_sessions = []
+    for session_id, session in user_sessions.items():
+        last_activity = session['last_activity']
+        if (now - last_activity).total_seconds() > SESSION_TIMEOUT_SECONDS:
+            expired_sessions.append(session_id)
+    for session_id in expired_sessions:
+        del user_sessions[session_id]
+        logger.info(f"Session expired and deleted: {session_id}")
+
+
+def update_conversation_history(session_id, query):
+    session = get_or_create_user_session(session_id)
+    session['conversation_history'].append({
+        'query': query,
+        'timestamp': datetime.datetime.now().isoformat()
+    })
+    return session['conversation_history']
+
+
+def semantic_search(query, knowledge_base, session_id=None, top_k=5):
     try:
         all_documents = []
         for knowledge_type, items in knowledge_base.items():

@@ -124,6 +124,24 @@ def chat():
                     'timestamp': timestamp.isoformat()
                 })
 
+            #check if the user is trying to sign up
+            if process_signup_trigger(user_message):
+                response_data = {
+                    "message": "Great! Let's get you registered with HerKey. Please fill out the form below:",
+                    "form_html": render_template('form.html'),
+                    "timestamp": datetime.now().isoformat()
+                }
+                return jsonify(response_data)
+
+            #detect response type based on keywords in user message
+            response_type = None
+            if any(word in user_message.lower() for word in ['job', 'career', 'position', 'work']):
+                response_type = 'job'
+            elif any(word in user_message.lower() for word in ['event', 'workshop', 'seminar']):
+                response_type = 'event'
+            elif any(word in user_message.lower() for word in ['bye', 'goodbye', 'exit', 'quit']):
+                response_type = 'bye'
+
             context = get_session_context(session)
             response, updated_context = process_user_message(
                 user_message,

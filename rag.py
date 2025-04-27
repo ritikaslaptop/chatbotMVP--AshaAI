@@ -60,4 +60,4 @@ def _get_document_text(doc):
                f"Date: {doc.get('date', '')}. Time: {doc.get('time', '')}"
 
     else:
-        return " ".join([f"{k}: {v}" for k, v in doc.items() if isinstance(v, str)])
+        return " ".join([f"{k}: {v}" for k, v in doc.items() if isinstance(v, str)]) #works
